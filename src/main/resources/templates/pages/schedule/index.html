@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>系统后台管理</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<link rel="stylesheet" th:href="@{/css/font.css}">
+		<link rel="stylesheet" th:href="@{/css/weadmin.css}">
+	</head>
+
+	<body>
+		<div class="weadmin-nav">
+			<span class="layui-breadcrumb">
+        <a href="">首页</a>
+        <a href="">定时任务</a>
+        <a>
+          <cite>首页</cite></a>
+      </span>
+			<a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+				<i class="layui-icon" style="line-height:30px">&#x1002;</i></a>
+		</div>
+		<div class="weadmin-body">
+			<div class="weadmin-block">
+				<button class="layui-btn layui-btn-danger" onclick="delAllJob()"><i class="layui-icon"></i>批量删除</button>
+				<button class="layui-btn" onclick="WeAdminShow('添加定时任务',baseurl+'/schedule/addJob',800,500)"><i class="layui-icon"></i>添加</button>
+				<button class="layui-btn" id="reload"><i class="layui-icon"></i>重载</button>
+			</div>
+			<table class="layui-hide" id="userList" lay-filter="lfilter"></table>
+			<script type="text/html" id="operationBar">
+
+                {{#  if(d.status == '0' ){ }}
+                <a title="启动" href="javascript:;" lay-event="start">
+                    <i class="layui-icon">&#xe652;</i>
+                </a>
+                {{#  } else { }}
+                <a title="停止" href="javascript:;" lay-event="stop">
+                    <i class="layui-icon">&#xe651;</i>
+                </a>
+                {{#  } }}
+				<a title="编辑" href="javascript:;" lay-event="edit">
+					<i class="layui-icon">&#xe642;</i>
+				</a>
+				<a title="删除" href="javascript:;" lay-event="del">
+					<i class="layui-icon">&#xe640;</i>
+				</a>
+                <a class="layui-btn layui-btn-normal" lay-event="queryLogs">
+                    查看日志
+                </a>
+			</script>
+
+		</div>
+
+		<!--<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>-->
+		<script th:attr="src=@{/layui/layui.js}" charset="utf-8"></script>
+		<script th:attr="src=@{/js/eleDel.js}" type="text/javascript" charset="utf-8"></script>
+        <script th:src="@{/js/jquery-1.9.1.js}" type="text/javascript"></script>
+		<script type="text/javascript" th:inline="javascript">
+			var baseurl;
+			var myTable;
+            layui.use(['table','jquery'], function(){
+                var table = layui.table;
+                $ = layui.jquery;
+                baseurl=[[${#httpServletRequest.getContextPath()}]];
+                myTable=table.render({
+                    elem: '#userList'
+                    ,url: baseurl+'/schedule/listAllJobs'
+                    ,id: 'id'
+					,height:'400px'
+                    ,method:'get'
+                    ,cols: [
+                        [
+                            {checkbox: true, fixed: true}
+                            ,{field:'jobId', width:'10.0%', title: '任务ID', sort: true}
+                            ,{field:'jobName', width:'15.0%', title: '任务名称', sort: true}
+                            ,{field:'jobGroup', width:'10.0%', title: '任务组', sort: true}
+                            ,{field:'status', width:'10.0%', title: '状态', templet: '#titleTpl'}
+                            ,{field:'createBy', width:'15.0%', title: '创建人'}
+                            ,{field:'createTime', width:'15.0%', title: '创建时间', sort: true}
+                            ,{field:'operation', width:'25%', title: '操作',toolbar: '#operationBar'}
+                        ]
+					]
+            ,page: true
+                    ,limit:10  //默认十条数据一页
+                    ,limits:[10,20,30,50]  //数据分页条
+                    ,request: {
+                    pageName: 'pageNo', //页码的参数名称，默认：page
+                        limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+            });
+                $("#reload").click(function(){
+                    myTable.reload();
+                })
+                //监听工具条
+                table.on('tool(lfilter)', function(obj){ //注：tool是工具条事件名，lfilter是table原始容器的属性 lay-filter="对应的值"
+                    var data = obj.data; //获得当前行数据
+                    var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                    if(layEvent === 'edit'){ //修改
+                        layer.open({
+                            type: 2,
+                            area: [500 + 'px', 400 + 'px'],
+                            fix: false, //不固定
+                            maxmin: true,
+                            shadeClose: true,
+                            shade: 0.4,
+                            title: '定时任务修改',
+                            content: baseurl+"/schedule/editJob"
+                        });
+                    } else if(layEvent === 'del'){ //删除
+                        var params={
+                            jobId:data.jobId,
+                            jobName:data.jobName,
+                            jobGroup:data.jobGroup
+                        };
+                        layer.confirm('确认要删除吗？', function(index) {
+                            $.ajax({
+                                type:'post',
+                                url:baseurl+"/schedule/deleteJob",
+                                data:params,
+                                dataType:'json',
+                                success:function(data){
+                                    if(data&&data.code==200){
+                                        layer.msg('已删除!', {
+                                            icon: 1,
+                                            time: 1000
+                                        });
+                                        $("#reload").click();
+                                    }else{
+                                        layer.msg('删除失败!', {
+                                            icon: 4,
+                                            time: 1000
+                                        });
+                                    }
+
+                                },
+                                error:function(){
+
+                                }
+                            })
+                            //发异步删除数据
+
+                        });
+                    }else if(layEvent=="start"){
+                        var params={
+                            jobId:data.jobId,
+                            jobName:data.jobName,
+							jobGroup:data.jobGroup
+						};
+                        $.ajax({
+							url:baseurl+"/schedule/startJob",
+							data:params,
+							type:'post',
+							success:function(data){
+                                if(data&&data.code==200){
+                                    $("#reload").click();
+                                }
+							},
+							error:function(){
+
+							}
+						})
+					}else if(layEvent=="stop"){
+                        var params={
+                            jobId:data.jobId,
+                            jobName:data.jobName,
+                            jobGroup:data.jobGroup
+                        }
+                        $.ajax({
+                            url:baseurl+"/schedule/stopJob",
+                            data:params,
+                            type:'post',
+                            dataType:'json',
+                            success:function(data){
+                                if(data&&data.code==200){
+                                    $("#reload").click();
+                                }
+                            },
+                            error:function(){
+
+                            }
+                        })
+					}else if(layEvent=="queryLogs"){
+                        var params={
+                            jobId:data.jobId,
+                        }
+                        $.ajax({
+                            type:'post',
+                            url:baseurl+"/jobLog/listJobLogsByJobId",
+                            data:params,
+                            dataType:'json',
+                            success:function(data){
+                                if(data&&data.code==200){
+                                    var content="<ul>";
+                                    for(var i in data.data){
+                                        content+="<li>";
+                                        content+=data.data[i].response;
+                                        content+="</li>";
+                                    }
+                                    content+="</ul>"
+                                    layer.open({
+                                        type: 0,
+                                        area: [600 + 'px', 400 + 'px'],
+                                        fix: false, //不固定
+                                        maxmin: true,
+                                        shadeClose: true,
+                                        shade: 0.4,
+                                        title: '日志详情',
+                                        content: content
+                                    });
+                                }
+                            }
+                        })
+					}
+                });
+
+            });
+            function showDetails(ele){
+                var content=$(ele).attr("data");
+                layer.open({
+                    type: 0,
+                    area: [400 + 'px', 300 + 'px'],
+                    fix: false, //不固定
+                    maxmin: true,
+                    shadeClose: true,
+                    shade: 0.4,
+                    title: '操作详情',
+                    content: content
+                });
+            }
+		</script>
+		<script type="text/html" id="opDescDiv">
+            <a onclick="showDetails(this)" data="{{d.opDesc}}" class="layui-btn layui-btn-normal layui-table-cell">操作详情</a>
+		</script>
+
+        <script type="text/html" id="titleTpl">
+            {{#  if(d.status == '0' ){ }}
+            <span class="layui-btn layui-btn-normal layui-btn-xs">已暂停</span>
+            {{#  } else { }}
+            <span class="layui-btn layui-btn-normal layui-btn-xs">已启用</span>
+            {{#  } }}
+        </script>
+
+	</body>
+
+</html>

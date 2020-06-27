@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>菜单编辑</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<link rel="stylesheet" th:href="@{/css/font.css}">
+		<link rel="stylesheet" th:href="@{/css/weadmin.css}">
+	</head>
+
+	<body>
+		<div class="weadmin-nav">
+			<span class="layui-breadcrumb">
+        <a href="">首页</a>
+        <a href="">用户管理</a>
+        <a>
+          <cite>菜单列表</cite></a>
+      </span>
+			<a class="layui-btn layui-btn-sm" style="line-height:1.6em;margin-top:3px;float:right" href="javascript:location.replace(location.href);" title="刷新">
+				<i class="layui-icon" style="line-height:30px">&#x1002;</i></a>
+		</div>
+		<div class="weadmin-body">
+			<div class="weadmin-block">
+                <button id="updateRole" class="layui-btn layui-btn-danger"><i class="layui-icon"></i>更新授权</button>
+            </div>
+			<table class="layui-hide" id="roleList" lay-filter="roleList"></table>
+
+		</div>
+		<!--<script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>-->
+		<script th:attr="src=@{/layui/layui.js}" charset="utf-8"></script>
+		<script th:attr="src=@{/js/eleDel.js}" type="text/javascript" charset="utf-8"></script>
+		<script type="text/javascript" th:inline="javascript">
+			var baseurl;
+            layui.use(['table','jquery','form'], function(){
+                var table = layui.table;
+                $ = layui.jquery;
+                var form=layui.form;
+                baseurl=[[${#httpServletRequest.getScheme()+"://"+#httpServletRequest.getServerName()+":"+#httpServletRequest.getServerPort()+#httpServletRequest.getContextPath()}]];
+                var roleId=[[${role.id}]];
+                var check=[[${ischecked}]];
+                var type=[[${type}]];
+                var layChecked=false;
+                if(type=="removeMenu"){
+                    layChecked=true;
+                }
+                var result={};
+                table.render({
+                    elem: '#roleList'
+                    ,url: baseurl+'/menu/listMenusByRoleId'
+                    ,id: 'id'
+					,height:'400px'
+					,where:{
+                        "roleId":roleId,
+						"type":type
+					}
+                    ,cols: [
+                        [
+                            {checkbox: true, fixed: true,LAY_CHECKED:layChecked}
+                            ,{field:'id', width:'15.0%', title: '菜单id', sort: true}
+                            ,{field:'parentid', width:'15.0%', title: '父菜单id', sort: true}
+                            ,{field:'menuchname', width:'20.0%', title: '菜单名称', sort: true}
+                            ,{field:'menuhref', width:'20.0%', title: '地址', sort: true}
+                            ,{field:'createTime', width:'20.0%', title: '创建时间'}
+                        ]
+					]
+                    ,page: false
+                    ,limit:1000  //默认十条数据一页
+                    });
+                table.on('checkbox(roleList)', function(obj){
+                    console.log(obj);
+                    var checked=obj.checked;
+                    var data=obj.data;
+                    result[data.id]=checked;
+                });
+                form.on("checkbox(allChoose)",function(data){
+                    console.log(data);
+				});
+                $("#updateRole").click(function(){
+                    var url=baseurl+"/menu/updateMenuByRole";
+                    for(var x in result){
+                        if(result[x]!=check){
+                            delete result[x];
+                        }
+                    }
+                    var params={};
+                    params.updateInfo=JSON.stringify(result);
+                    params.roleId=roleId;
+                    params.type=type;
+                    $.ajax({
+                        url:url,
+                        type:'post',
+                        dataType:'json',
+                        data:params,
+                        success:function(data){
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                            if(data.code=="200"){
+                                parent.layer.msg("更新成功!");
+                            }else{
+                                parent.layer.msg("更新失败!");
+                            }
+                        },
+                        error:function(){
+                            var index = parent.layer.getFrameIndex(window.name);
+                            parent.layer.close(index);
+                        }
+                    })
+                })
+          });
+		</script>
+	</body>
+
+</html>

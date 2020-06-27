@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taoge.zxstbg.database.webtls.dao.BisUseLogMapper" >
+  <resultMap id="BaseResultMap" type="com.taoge.zxstbg.database.webtls.entity.BisUseLog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="module" property="module" jdbcType="VARCHAR" />
+    <result column="op_time" property="opTime" jdbcType="VARCHAR" />
+    <result column="op_user_id" property="opUserId" jdbcType="VARCHAR" />
+    <result column="op_user_name" property="opUserName" jdbcType="VARCHAR" />
+    <result column="op_dept_id" property="opDeptId" jdbcType="VARCHAR" />
+    <result column="op_dept_name" property="opDeptName" jdbcType="VARCHAR" />
+    <result column="op_type" property="opType" jdbcType="VARCHAR" />
+    <result column="client_ip" property="clientIp" jdbcType="VARCHAR" />
+    <result column="case_code" property="caseCode" jdbcType="VARCHAR" />
+    <result column="target_num_id" property="targetNumId" jdbcType="VARCHAR" />
+    <result column="target_num" property="targetNum" jdbcType="VARCHAR" />
+    <result column="query_begin_time" property="queryBeginTime" jdbcType="VARCHAR" />
+    <result column="query_end_time" property="queryEndTime" jdbcType="VARCHAR" />
+    <result column="parent_busi_id" property="parentBusiId" jdbcType="VARCHAR" />
+    <result column="busi_id" property="busiId" jdbcType="VARCHAR" />
+    <result column="busi_url" property="busiUrl" jdbcType="VARCHAR" />
+    <result column="upload_flag" property="uploadFlag" jdbcType="VARCHAR" />
+    <result column="fail_time" property="failTime" jdbcType="TIMESTAMP" />
+    <result column="op_desc" property="opDesc" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, module, op_time, op_user_id, op_user_name, op_dept_id, op_dept_name, op_type, 
+    client_ip, case_code, target_num_id, target_num, query_begin_time, query_end_time, 
+    parent_busi_id, busi_id, busi_url, upload_flag, fail_time,op_desc
+  </sql>
+  <select id="selectById" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from bis_sinovatio_use_log
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="listAllUseLogs" parameterType="com.taoge.zxstbg.database.webtls.entity.BisPage" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from bis_sinovatio_use_log
+    limit #{start,jdbcType=INTEGER},#{size,jdbcType=INTEGER}
+  </select>
+
+  <select id="countAllUseLogs" resultType="integer">
+    select count(id)
+    from bis_sinovatio_use_log
+  </select>
+
+
+
+</mapper>

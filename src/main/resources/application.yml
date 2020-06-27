@@ -1,0 +1,32 @@
+server:
+  port: 8290
+  servlet:
+    context-path: /zxstbg
+spring:
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML
+    encoding: UTF-8
+    servlet:
+      content-type: text/html
+    cache: false
+  datasource:
+    zxstbg:
+      driver-class-name: com.mysql.jdbc.Driver
+      jdbc-url: jdbc:mysql://114.55.64.105:3306/zxskbg?characterEncoding=utf-8&serverTimezone=UTC&&noAccessToP
+      username: root
+      password: TXF19950605..
+    webtls:
+      driver-class-name: com.mysql.jdbc.Driver
+      jdbc-url: jdbc:mysql://114.55.64.105:3306/bgsystem5?serverTimezone=UTC&noAccessToProcedureBodies=true&useUnicode=true&zeroDateTimeBehavior=convertToNull&characterEncoding=utf8
+      username: root
+      password: TXF19950605..
+  main:
+    allow-bean-definition-overriding: true
+#mybatis:
+#    # 加载全局的配置文件
+#    configLocation: classpath:mapper/mybatis-config.xml
+logging:
+  level:
+    com.sinovatio.zxstbg.database: debug

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.taoge.zxstbg.database.zxstbg.dao.SysJobLogMapper" >
+  <resultMap id="BaseResultMap" type="com.taoge.zxstbg.database.zxstbg.entity.SysJobLog" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="job_id" property="jobId" jdbcType="INTEGER" />
+    <result column="request_time" property="requestTime" jdbcType="DATE" />
+    <result column="response_time" property="responseTime" jdbcType="DATE" />
+    <result column="time_consuming" property="timeConsuming" jdbcType="INTEGER" />
+    <result column="request" property="request" jdbcType="LONGVARCHAR" />
+    <result column="response" property="response" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, job_id, request_time, response_time, time_consuming,request, response
+  </sql>
+  <select id="listJobLogsByJobId" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from sys_job_log
+    where job_id = #{jobId,jdbcType=INTEGER} order by id desc limit 10;
+  </select>
+
+  <insert id="insert" useGeneratedKeys="true" parameterType="com.taoge.zxstbg.database.zxstbg.entity.SysJobLog" >
+
+      insert into sys_job_log
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="jobId != null" >
+        job_id,
+      </if>
+      <if test="requestTime != null" >
+        request_time,
+      </if>
+      <if test="responseTime != null" >
+        response_time,
+      </if>
+      <if test="timeConsuming != null" >
+        time_consuming,
+      </if>
+      <if test="request != null" >
+        request,
+      </if>
+      <if test="response != null" >
+        response,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="jobId != null" >
+        #{jobId,jdbcType=INTEGER},
+      </if>
+      <if test="requestTime != null" >
+        #{requestTime,jdbcType=DATE},
+      </if>
+      <if test="responseTime != null" >
+        #{responseTime,jdbcType=DATE},
+      </if>
+      <if test="timeConsuming != null" >
+        #{timeConsuming,jdbcType=INTEGER},
+      </if>
+      <if test="request != null" >
+        #{request,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="response != null" >
+        #{response,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+
+
+</mapper>
